@@ -2,7 +2,10 @@
 title: "Informe del Curso de Programación"
 author: "Grupo 3"
 date: "20/9/2020"
-output: 
+output:
+  word_document:
+    toc: yes
+    toc_depth: '2'
   html_document:
     toc: yes
     toc_depth: 2
