@@ -1,4 +1,4 @@
-# **INFORME FINAL **
+# INFORME FINAL
 
 CURSO: Programación 2020              
 Profesor: Ing. geógrafo Roy Yali
