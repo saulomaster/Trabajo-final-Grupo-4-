@@ -1,0 +1,111 @@
+---
+title: "Informe del Curso de Programación"
+author: "Grupo 3"
+date: "20/9/2020"
+output: 
+  html_document:
+    toc: yes
+    toc_depth: 2
+lang: es-ES
+---
+# Porcentaje Sin Ingresos Propios
+
+Primero, cargamos las librerias que necesitaremos para realizar el trabajo
+```{r}
+library(ggplot2)
+library(tidyverse)
+``` 
+
+Cargamos el archivo csv que contiene los datos de hombres y mujeres sin ingresos propios tanto nacional, rural y urbano
+```{r}
+data <- read.csv("C:/Users/NEYSSER/Desktop/ciclo _5 _IG/porcentaje_sin_ingresos_propios.csv")
+head(data)
+``` 
+
+Usamos gather para fundir o agrupar los datos de las zonas rurales y urbanas en comparacion con los años y su porcentaje luego dejamos intacto los datos a nivel nacional, y con head podemos visualizar los datos parcialmente
+```{r}
+df <- data %>% 
+  gather(key = "Zona", value = "Porcentaje", -Año, -Nac_Mujeres, -Nac_Hombres)
+head(df)
+```
+
+## Construimos el Grafico con ggplot
+
+Agrupamos los datos de las zonas rurales y urbanas para colocarlo en el aes y agruparlo, darle color según ello
+```{r}
+ggplot(df, aes(Año, Porcentaje, group = Zona)) +
+  geom_line(aes(color = Zona))
+```
+
+Como vemos en el grafico nos hes un poco dificil relacionar o encontrar cual linea representa cada valor. Asi que modificaremos el grafico con las distintas posibilidades que nos ofrece ggplot
+```{r}
+n <- ggplot(df, aes(Año, Porcentaje, group = Zona)) +
+
+# Configuramos la forma de la linea segun la zona
+  geom_line(aes(linetype = Zona, color= Zona)) + 
+  
+# Añadimos los puntos en cada año y le damos transparencia
+  geom_point(alpha = .2) + 
+  
+# Escribimos el titulo y la descricion de la imagen al pie de pagina
+  ggtitle("PERÚ: Mujeres y hombres sin ingresos propios, según ámbito geográfico") + 
+  labs(caption="Realizado por: Grupo B - Fuente: INEI (datos abiertos)") +
+
+# Los nombres de los ejes (en el caso del eje "x" lo dejamos en blanco porque se sobreentiende)
+  xlab("") +
+  ylab("Personas sin ingresos propios (porcentaje)") +
+  
+# Configurar el "x" para que se separe cada año
+  scale_x_continuous(breaks = seq(2007, 2018, 1)) +
+  
+# De manera similar el eje "y", intervalo considerado sera cada 5
+  scale_y_continuous(
+    breaks = seq(10, 60, 5)
+  ) +
+  
+# Las siguiente lineas son anotaciones hechas a mano para cada linea 
+  annotate("text",
+           x = 2017,
+           y = 45,
+           label = "Rural Mujeres",
+           color = "#792427",
+           fontface = "bold",
+           size = 4.5) +
+  
+  annotate("text",
+           x = 2015,
+           y = 30,
+           label = "Urbano Mujeres",
+           color = "#545058",
+           fontface = "bold",
+           size = 4.5) +
+  
+  annotate("text",
+           x = 2016,
+           y = 14,
+           label = "Rural Hombres",
+           color = "#D73815",
+           fontface = "bold",
+           size = 4.5) +
+  
+  annotate("text",
+           x = 2017.8,
+           y = 11,
+           label = "Urbano Hombres",
+           color = "#2B818E",
+           fontface = "bold",
+           size = 4.5) +
+  
+  # Selecionamos un tema de fondo
+  theme_bw() +
+  
+  # Eliminamos la leyenda
+  theme(legend.position = "none")
+
+n
+```
+
+## Conclusión
+Podria ser que las mujeres de area rural son mayor porcentaje en cuanto a no contar con ingresos propios aunque en los ultimos años tiene tendendia a bajar. Los hombres de las zonas rurales y urbanas tienen un aproximado porcentaje en los ultimos años
+
+# Relación Temperatura-Salinidad en el mar peruano
