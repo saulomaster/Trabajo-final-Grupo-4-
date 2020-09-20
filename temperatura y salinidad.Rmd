@@ -1,0 +1,164 @@
+---
+title: "Informe del Curso de Programación"
+author: "Grupo 3"
+date: "20/9/2020"
+output: 
+  html_document:
+    toc: yes
+    toc_depth: 2
+lang: es-ES
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Regresión lineal comparando la temperatura del mar y latitud
+
+Cargamos las librerias que usaremos en este ejercicio.
+
+````{r message = FALSE, error = FALSE, warning = FALSE}
+library(rgee)
+library(mapview)
+library(mapedit)
+library(tidyverse)
+library(sf)
+library(raster)
+````
+
+Necesitamos iniciar nuestra cuenta
+```{r eval=FALSE}
+ee_Initialize()
+```
+
+Creamos un area de interés mediante el uso de mapview y editmap, luego selecionamos todos sus atributos
+```{r eval=FALSE}
+area <- mapview() %>% editMap()
+area_sf <- area$all
+```
+![Área seleccionada](C:/Users/NEYSSER/Desktop/trabajo final progra/imagen_1.jpeg)
+
+
+Convertimos el área a un objeto Earth Engine. Exportamos como un objeto Earth Engine
+```{r eval=FALSE}
+area_ee <- sf_as_ee(area_sf)
+```
+
+Llamamos a la colección de imagen de la base de datos de Google Earth Engine para extraer la temperatura y salinidad a nivel de la superficie del mar. Filtramos la media de los datos
+```{r eval=FALSE}
+imagen <- ee$ImageCollection("HYCOM/sea_temp_salinity")$
+  filterDate(ee$Date("2018-01-01"), ee$Date("2018-01-31"))$
+  mean()
+```
+
+Descargamos las imagenes a nuestro directorio local mediante ee_as_raster
+```{r eval=FALSE}
+area_stack <- ee_as_raster(image = imagen,
+                           region = area_ee$geometry())
+```
+
+
+Selecionamos las bandas que usaremos; en este caso la temperatura y salinidad superficial
+```{r eval=FALSE}
+area_temp <- area_stack[["water_temp_0"]]
+mar_salinidad <- area_stack[["salinity_0"]]
+```
+
+Aunque las unidades de la temperatura esten en grados centrigrados podemos obtener la escala apropiada con los valores que nos ofrece la tabla de las bandas del dataset en GEE
+![Área seleccionada](C:/Users/NEYSSER/Desktop/trabajo final progra/imagen_5.jpeg)
+
+Tanto para la temperatura como la salinidad y lo guardamos con los mismos nombres
+```{r eval=FALSE}
+mar_temperatura <- (mar_temperatura * 0.001) + 20
+mar_salinidad <- (mar_salinidad * 0.001) + 20
+```
+
+Marcamos unos puntos aleatorios y nuevamente selecionamos todos sus atributos
+```{r eval=FALSE}
+puntos <- mapview(area_sf) %>% editMap()
+puntos_sf <- punto$all
+```
+![Puntos seleccionados](C:/Users/NEYSSER/Desktop/trabajo final progra/imagen_2.jpeg)
+
+Con estas lineas codigo extraemos los valores de latitud y longitud del "sf" y guardamos con el mismo nombre
+```{r eval=FALSE}
+puntos_sf <- puntos_sf %>%
+  mutate(lon = unlist(map(puntos_sf$geometry,1)),
+         lat = unlist(map(puntos_sf$geometry,2)))
+```
+
+Extraemos los datos de temperaturas y salinidad con el archivo raster descargado de GEE a los puntos seleccionados anteriormente. Los nombres de las columnas lo definimos añadiendole despues del simbolo del dolar
+```{r eval=FALSE}
+puntos_sf$temp <- raster::extract(mar_temperatura, puntos_sf)
+puntos_sf$sal <- raster::extract(mar_salinidad, puntos_sf)
+```
+
+Revisamos los datos creados anteriormente
+```{r solo para que lea el archivo (no se mostrará), echo=FALSE, results='hide'}
+puntos_sf <- st_read("C:/Users/NEYSSER/Desktop/trabajo final progra/puntos_sf.shp")
+```
+
+```{r}
+puntos_sf
+```
+
+Convertimos a un tibble y seleccionamos las colummnas que usaremos
+```{r}
+puntos_data <- puntos_sf %>%
+  as_tibble() %>%
+  dplyr::select(lat, lon, temp, sal)
+head(puntos_data)
+```
+
+Podemos comparar graficamente la relacion entre las variables
+```{r}
+pairs(puntos_data)
+```
+
+```{r}
+cor(puntos_data)
+```
+
+
+Realizamos una regresion lineal comparando la latitud con la salinidad
+```{r}
+regresion_salinidad <- lm(lat ~ sal, data = puntos_data)
+summary(regresion_salinidad)
+```
+
+Ploteamos la temperatura vs latitud y añadimos la linea de regresion 
+```{r eval=FALSE}
+plot(puntos_data$sal, puntos_data$lat,
+     main = "Latitud vs Salinidad superficial",
+     ylab = "Latitud",
+     xlab = "Salinidad (psu)",
+     col = "blue")
+abline(regresion_salinidad)
+```
+
+```{r eval=FALSE, echo=FALSE}
+plot(salinidad)
+```
+![](C:/Users/NEYSSER/Desktop/trabajo final progra/imagen_4.jpeg)
+
+Ahora para la latitud con la temperatura
+```{r}
+regresion_temperatura <- lm(lat ~ temp, data = puntos_data)
+summary(regresion_temperatura)
+```
+
+Ploteamos la temperatura y añadimos la linea de regresion 
+```{r eval=FALSE}
+plot(puntos_data$temp, puntos_data$lat,
+     main = "Latitud vs Temperatura superficial",
+     ylab = "Latitud",
+     xlab = "Temperatura (°C)",
+     col = "blue")
+abline(regresion_temperatura, col = "red")
+```
+
+```{r eval=FALSE, echo=FALSE}
+plot(temperatura)
+```
+![](C:/Users/NEYSSER/Desktop/trabajo final progra/imagen_3.jpeg)
+
