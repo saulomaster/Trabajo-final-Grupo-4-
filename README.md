@@ -1,6 +1,17 @@
 # **INFORME FINAL **
-CURSO: Programación 2020
+
+CURSO: Programación 2020              
 Profesor: Ing. geógrafo Roy Yali
+
+INTEGRANTES:
+
+| Alumno   | Código  |
+| ------------ | ------------ |
+|  Bautista Rojas Jhon Edmirando  |  18160045 |
+|  Flores Marcos Lucy Angie Sharon |  18160193  |
+| Hinostroza Camones Gabriela Isabel  |  18160037  |
+|  Pfuturi Huarcaya Saul Oscar | 18160041  |
+| Ysuhuaylas Segovia Luis Eduardo  | 18160044  |
 
 
 **Table of Contents**
@@ -9,7 +20,8 @@ Profesor: Ing. geógrafo Roy Yali
 
 [TOC]
 
-#Porcentaje Sin Ingresos Propios
+# PORCENTAJE SIN INGRESOS PROPIOS
+
 ### 1. Librerias a usar
 
 library(ggplot2)
